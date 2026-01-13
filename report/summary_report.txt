@@ -1,0 +1,6 @@
+This project implements a CNN-based image classification system using the Cats vs Dogs dataset.
+Images were resized, normalized, and augmented before training.
+A convolutional neural network was built using TensorFlow.
+The model was trained and evaluated using accuracy metrics.
+The trained model was deployed as a web application using Streamlit.
+This project demonstrates both machine learning and deployment skills.
