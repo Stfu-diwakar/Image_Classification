@@ -6,36 +6,56 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
 
-# -----------------------------
-# Model download from Google Drive
-# -----------------------------
-MODEL_PATH = "model/cats_vs_dogs_cnn.h5"
+# ---------------------------------
+# Reduce TensorFlow log noise
+# ---------------------------------
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+# ---------------------------------
+# Google Drive model config
+# ---------------------------------
+MODEL_DIR = "model"
+MODEL_PATH = os.path.join(MODEL_DIR, "cats_vs_dogs_cnn.h5")
 MODEL_URL = "https://drive.google.com/uc?id=1LrLSyQtccj1PYYMMhfwcygmiVHgTp5XC"
 
-# Create model directory if not exists
-if not os.path.exists("model"):
-    os.makedirs("model")
+# ---------------------------------
+# Ensure model directory exists
+# ---------------------------------
+os.makedirs(MODEL_DIR, exist_ok=True)   # ✅ FIX HERE
 
+# ---------------------------------
 # Download model if not present
+# ---------------------------------
 if not os.path.exists(MODEL_PATH):
     st.info("Downloading model from Google Drive (first run only)...")
     urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
 
-# Load model
-model = tf.keras.models.load_model(MODEL_PATH,compile=False)
+# ---------------------------------
+# Load model (compatibility safe)
+# ---------------------------------
+model = tf.keras.models.load_model(
+    MODEL_PATH,
+    compile=False
+)
 
-# -----------------------------
+# ---------------------------------
 # Streamlit UI
-# -----------------------------
+# ---------------------------------
 st.set_page_config(page_title="Cats vs Dogs Classifier", layout="centered")
 
 st.title("🐱🐶 Cats vs Dogs Image Classification")
 st.write("Upload an image and the CNN model will predict whether it is a **Cat** or a **Dog**.")
 
-uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader(
+    "Upload an image",
+    type=["jpg", "jpeg", "png"]
+)
 
+# ---------------------------------
+# Prediction
+# ---------------------------------
 if uploaded_file is not None:
-    img = Image.open(uploaded_file)
+    img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_column_width=True)
 
     img = img.resize((150, 150))
@@ -48,4 +68,3 @@ if uploaded_file is not None:
         st.success("Prediction: 🐶 Dog")
     else:
         st.success("Prediction: 🐱 Cat")
-
