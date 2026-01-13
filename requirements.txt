@@ -1,6 +1,5 @@
-tensorflow==2.15.0
+streamlit==1.31.0
+tensorflow-cpu==2.15.0
 numpy
 pillow
-streamlit
 scipy
-matplotlib
