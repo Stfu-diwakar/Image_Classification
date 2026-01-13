@@ -22,7 +22,7 @@ if not os.path.exists(MODEL_PATH):
     urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
 
 # Load model
-model = tf.keras.models.load_model(MODEL_PATH)
+model = tf.keras.models.load_model(MODEL_PATH,compile=False)
 
 # -----------------------------
 # Streamlit UI
@@ -48,3 +48,4 @@ if uploaded_file is not None:
         st.success("Prediction: 🐶 Dog")
     else:
         st.success("Prediction: 🐱 Cat")
+
