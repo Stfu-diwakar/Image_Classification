@@ -1,10 +1,9 @@
 import os
-import urllib.request
 import streamlit as st
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
+import gdown
 
 # ---------------------------------
 # Reduce TensorFlow log noise
@@ -12,30 +11,48 @@ from PIL import Image
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 # ---------------------------------
-# Google Drive model config
+# Streamlit Page Config
+# ---------------------------------
+st.set_page_config(
+    page_title="Cats vs Dogs Classifier",
+    layout="centered"
+)
+
+# ---------------------------------
+# Model Config
 # ---------------------------------
 MODEL_PATH = "cats_vs_dogs_cnn.keras"
+
+# IMPORTANT: Use this format for gdown
 MODEL_URL = "https://drive.google.com/uc?id=1uHxsyYwzjSmsuYMt7H4EHaHT-tSNa2Wc"
 
 # ---------------------------------
-# Download model if not present
+# Download model (if not exists)
 # ---------------------------------
-if not os.path.exists(MODEL_PATH):
-    st.info("Downloading model from Google Drive (first run only)...")
-    urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+@st.cache_resource
+def load_model():
+    try:
+        if not os.path.exists(MODEL_PATH):
+            st.info("📥 Downloading model... (only first time)")
+            gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+
+        # Load model safely
+        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        return model
+
+    except Exception as e:
+        st.error("❌ Error loading model")
+        st.exception(e)
+        return None
+
+
+model = load_model()
 
 # ---------------------------------
-# Load model (KERAS format – safe)
+# UI
 # ---------------------------------
-model = tf.keras.models.load_model(MODEL_PATH)
-
-# ---------------------------------
-# Streamlit UI
-# ---------------------------------
-st.set_page_config(page_title="Cats vs Dogs Classifier", layout="centered")
-
 st.title("🐱🐶 Cats vs Dogs Image Classification")
-st.write("Upload an image and the CNN model will predict whether it is a **Cat** or a **Dog**.")
+st.write("Upload an image and the model will predict whether it's a **Cat** or a **Dog**.")
 
 uploaded_file = st.file_uploader(
     "Upload an image",
@@ -45,17 +62,26 @@ uploaded_file = st.file_uploader(
 # ---------------------------------
 # Prediction
 # ---------------------------------
-if uploaded_file is not None:
-    img = Image.open(uploaded_file).convert("RGB")
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+if uploaded_file is not None and model is not None:
+    try:
+        # Display image
+        img = Image.open(uploaded_file).convert("RGB")
+        st.image(img, caption="Uploaded Image", use_column_width=True)
 
-    img = img.resize((150, 150))
-    img_array = image.img_to_array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+        # Preprocess
+        img = img.resize((150, 150))
+        img_array = np.array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
-    prediction = model.predict(img_array)
+        # Predict
+        prediction = model.predict(img_array)
 
-    if prediction[0][0] > 0.5:
-        st.success("Prediction: 🐶 Dog")
-    else:
-        st.success("Prediction: 🐱 Cat")
+        # Output
+        if prediction[0][0] > 0.5:
+            st.success("🐶 Dog")
+        else:
+            st.success("🐱 Cat")
+
+    except Exception as e:
+        st.error("❌ Error during prediction")
+        st.exception(e)
