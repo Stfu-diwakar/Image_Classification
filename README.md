@@ -7,4 +7,4 @@ The model is trained using **TensorFlow (Keras)** and deployed as a **web applic
 Due to GitHub file size limitations, the trained model is hosted on **Google Drive** and downloaded dynamically at runtime.
 
 
-link : https://dwkr666.streamlit.app/
+link : https://dwkr-06.streamlit.app/
