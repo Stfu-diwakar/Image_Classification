@@ -37,7 +37,7 @@ def load_model():
             gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
 
         # Load model safely
-        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        model = keras.models.load_model(MODEL_PATH, compile=False)
         return model
 
     except Exception as e:
